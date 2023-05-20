@@ -1,4 +1,4 @@
-function ExcelTableOutput({ sheetData }) {
+function ExcelTableOutput({ sheetData, createBatchClick }) {
 	return (
 		<div>
 			{sheetData.length > 0 && (
@@ -40,7 +40,10 @@ function ExcelTableOutput({ sheetData }) {
 							</tbody>
 						</table>
 						<div className="d-flex justify-content-end">
-							<button className="btn btn-primary mt-3">
+							<button
+								onClick={createBatchClick}
+								className="btn btn-primary mt-3"
+							>
 								Create Batch
 							</button>
 						</div>

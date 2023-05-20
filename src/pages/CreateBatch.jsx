@@ -13,44 +13,50 @@ import DownloadExcelTemplate from "../components/DownloadExcelTemplate";
 import UploadExcelTemplate from "../components/UploadExcelTemplate";
 const contract = new ethers.Contract(contractAddress, FireGuys.abi, signer);
 import CreateBatchInfo from "../components/CreateBatchInfo";
+import { firebaseCreateBatch } from "../firebase_setup/globals";
+import { storeReceipt } from "../firebase_setup/globals";
+
 function CreateBatch() {
-	const [totalMinted, setTotalMinted] = useState(0);
-	const [batchInfo, setBatchInfo] = useState({
-		batchName: "",
-		templateType: "Diploma",
-	});
-	const [templateSheetData, setTemplateSheetData] = useState(0);
+	// const imageURI = `https://gateway.pinata.cloud/ipfs/${contentId}/${tokenId}.png`;
+	const imageURI = `img/0.jpg`;
 	useEffect(() => {
 		getCount();
 	}, []);
+
+	// blockchain actions
+	const [totalMinted, setTotalMinted] = useState(0);
 	const getCount = async () => {
 		const count = await contract.count();
 		console.log(parseInt(count));
 		setTotalMinted(parseInt(count));
 	};
 
-	// const templates = ["Diploma", "Certificate", "ID"];
+	const mintToken = async () => {
+		const tokenId = totalMinted + 1;
+		const contentId = "QmRYiKnb8xxn1vrPRThuAnkTkGfokqHg4hXB1YR19ifbZw";
+		const metadataURI = `${contentId}/${tokenId}.json`;
+
+		const connection = contract.connect(signer);
+		const addr = connection.address;
+		const result = await contract.payToMint(addr, metadataURI, "test", {
+			value: ethers.utils.parseEther("0"),
+		});
+		const receipt = await result.wait();
+		console.log(receipt);
+		storeReceipt(tokenId, JSON.stringify(receipt));
+		getMintedStatus();
+		getCount();
+	};
+
+	// firebase actions
+	const [batchInfo, setBatchInfo] = useState({
+		batchName: "Batch 2020-2021",
+		templateType: "Diploma",
+	});
+	const [templateSheetData, setTemplateSheetData] = useState(0);
 	const templates = {
 		Diploma: "/templates/DIPLOMA_CVSU.xlsx",
 		"Certificate Of Grades": "/templates/COG_CVSU.xlsx",
-	};
-
-	const handleExcelFileChange = (event) => {
-		const file = event.target.files[0];
-		// Do something with the selected file
-		var reader = new FileReader();
-		reader.readAsArrayBuffer(event.target.files[0]);
-		reader.onload = function (event) {
-			var data = new Uint8Array(reader.result);
-			var work_book = read(data, { type: "array" });
-			var sheet_name = work_book.SheetNames;
-			var sheet_data = utils.sheet_to_json(
-				work_book.Sheets[sheet_name[0]],
-				{ header: 1 }
-			);
-			setTemplateSheetData(sheet_data);
-			console.log(sheet_data);
-		};
 	};
 
 	return (
@@ -80,12 +86,23 @@ function CreateBatch() {
 			<DownloadExcelTemplate
 				excelTemplatePath={templates[batchInfo.templateType]}
 			/>
-			<UploadExcelTemplate
-				handleExcelFileChange={handleExcelFileChange}
+			<UploadExcelTemplate setTemplateSheetData={setTemplateSheetData} />
+			<ExcelTableOutput
+				sheetData={templateSheetData}
+				createBatchClick={createBatch}
 			/>
-			<ExcelTableOutput sheetData={templateSheetData} />
 		</div>
 	);
+
+	async function createBatch() {
+		await mintToken();
+		// console.log("1");
+		// const batchKey = await firebaseCreateBatch(batchInfo);
+		// console.log(batchKey);
+		// const tx = await contract.createBatch(batchName, templateType, templateData);
+		// await tx.wait();
+		// console.log("Batch Created");
+	}
 }
 
 export default CreateBatch;
