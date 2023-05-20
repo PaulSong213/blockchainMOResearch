@@ -13,7 +13,7 @@ contract FiredGuys is ERC721, ERC721URIStorage, Ownable {
     uint256 private _mintedValue;
     mapping(string => uint8) existingURIs;
 
-    constructor() ERC721("FiredGuys", "FYR") {}
+    constructor() ERC721("CvSU Academic Documents", "CvSU") {}
 
     function _baseURI() internal pure override returns (string memory) {
         return "ipfs://";
@@ -44,11 +44,11 @@ contract FiredGuys is ERC721, ERC721URIStorage, Ownable {
         return existingURIs[uri] == 1;
     }
 
-    function payToMint(
+    function mintAcademicDocument(
         address recipient,
         string memory metadataURI,
         string memory value
-    ) public payable returns (uint256) {
+    ) public returns (uint256) {
         require(existingURIs[metadataURI] != 1, "NFT already minted!");
         // require(msg.value >= 0.01 ether, "Not enough ETH sent; check price!"); // no need price for this project
         uint256 newItemId = _tokenIdCounter.current();
@@ -58,6 +58,21 @@ contract FiredGuys is ERC721, ERC721URIStorage, Ownable {
         _setTokenURI(newItemId, metadataURI);
         _mintedValues[newItemId] = value; // Store the value for the minted item
         return newItemId;
+    }
+
+    function batchMintAcademicDocuments(
+        address[] memory recipients,
+        string[] memory metadataURIs,
+        string[] memory values
+    ) public {
+        require(
+            recipients.length == metadataURIs.length &&
+                recipients.length == values.length,
+            "Invalid input lengths"
+        );
+        for (uint256 i = 0; i < recipients.length; i++) {
+            mintAcademicDocument(recipients[i], metadataURIs[i], values[i]);
+        }
     }
 
     function getMintedValue(

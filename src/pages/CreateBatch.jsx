@@ -3,19 +3,19 @@ import WalletBalance from "../components/WalletBalance";
 import { useEffect, useState } from "react";
 import FireGuys from "../../artifacts/contracts/MyNFT.sol/FiredGuys.json";
 import NFTImage from "../components/NFTImage";
-const contractAddress = "0x2A4769759D04c973ab712bB189db5499562B65F8";
 import ExcelTableOutput from "../components/ExcelTableOutput";
 import { read, utils } from "xlsx";
-const provider = new ethers.providers.Web3Provider(window.ethereum);
-const signer = provider.getSigner();
 import PageHeader from "../components/PageHeader";
 import DownloadExcelTemplate from "../components/DownloadExcelTemplate";
 import UploadExcelTemplate from "../components/UploadExcelTemplate";
-const contract = new ethers.Contract(contractAddress, FireGuys.abi, signer);
 import CreateBatchInfo from "../components/CreateBatchInfo";
 import { firebaseCreateBatch } from "../firebase_setup/globals";
 import { storeReceipt } from "../firebase_setup/globals";
 
+const provider = new ethers.providers.Web3Provider(window.ethereum);
+const signer = provider.getSigner();
+const contractAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+const contract = new ethers.Contract(contractAddress, FireGuys.abi, signer);
 function CreateBatch() {
 	// const imageURI = `https://gateway.pinata.cloud/ipfs/${contentId}/${tokenId}.png`;
 	const imageURI = `img/0.jpg`;
@@ -27,25 +27,38 @@ function CreateBatch() {
 	const [totalMinted, setTotalMinted] = useState(0);
 	const getCount = async () => {
 		const count = await contract.count();
-		console.log(parseInt(count));
 		setTotalMinted(parseInt(count));
+		return count;
 	};
 
-	const mintToken = async () => {
-		const tokenId = totalMinted + 1;
+	const batchMintToken = async (batchAcademicValues) => {
+		const currentTotalMinted = await getCount();
 		const contentId = "QmRYiKnb8xxn1vrPRThuAnkTkGfokqHg4hXB1YR19ifbZw";
-		const metadataURI = `${contentId}/${tokenId}.json`;
-
 		const connection = contract.connect(signer);
 		const addr = connection.address;
-		const result = await contract.payToMint(addr, metadataURI, "test", {
-			value: ethers.utils.parseEther("0"),
-		});
-		const receipt = await result.wait();
-		console.log(receipt);
-		storeReceipt(tokenId, JSON.stringify(receipt));
-		getMintedStatus();
-		getCount();
+		let addresses = [];
+		let metadataURIs = [];
+		let tokenIds = [];
+		for (let i = 0; i < batchAcademicValues.length; i++) {
+			addresses.push(addr);
+			// metadataURI
+			const tokenId = Number(currentTotalMinted) + Number(i) + 1;
+			const metadataURI = `${contentId}/${tokenId}.json`;
+			tokenIds.push(tokenId);
+			metadataURIs.push(metadataURI);
+			console.log(tokenId);
+		}
+		const result = await contract.batchMintAcademicDocuments(
+			addresses,
+			metadataURIs,
+			batchAcademicValues
+		);
+		const txReceipt = await result.wait();
+		console.log(txReceipt);
+		const count = await contract.count();
+		setTotalMinted(parseInt(count));
+		console.log("Total Minted: ", parseInt(count));
+		return { tokenIds, txReceipt };
 	};
 
 	// firebase actions
@@ -53,7 +66,7 @@ function CreateBatch() {
 		batchName: "Batch 2020-2021",
 		templateType: "Diploma",
 	});
-	const [templateSheetData, setTemplateSheetData] = useState(0);
+	const [templateSheetData, setTemplateSheetData] = useState({});
 	const templates = {
 		Diploma: "/templates/DIPLOMA_CVSU.xlsx",
 		"Certificate Of Grades": "/templates/COG_CVSU.xlsx",
@@ -95,13 +108,39 @@ function CreateBatch() {
 	);
 
 	async function createBatch() {
-		await mintToken();
-		// console.log("1");
-		// const batchKey = await firebaseCreateBatch(batchInfo);
-		// console.log(batchKey);
-		// const tx = await contract.createBatch(batchName, templateType, templateData);
-		// await tx.wait();
-		// console.log("Batch Created");
+		const batchKey = await firebaseCreateBatch(batchInfo);
+		const academicValues = templateSheetData;
+		const keys = academicValues[0];
+		const batchAcademicValues = [];
+		for (let i = 1; i < academicValues.length; i++) {
+			const currentRow = academicValues[i];
+			let toMintAcademicValue = {};
+			for (let k = 0; k < keys.length; k++) {
+				const key = keys[k];
+				toMintAcademicValue[key] = currentRow[k];
+			}
+			console.log(toMintAcademicValue);
+			batchAcademicValues.push(toMintAcademicValue);
+		}
+		const { tokenIds, txReceipt } = await batchMintToken(
+			batchAcademicValues
+		);
+		for (let i = 0; i < tokenIds.length; i++) {
+			const tokenId = tokenIds[i];
+			let isLast = false;
+			if (i == tokenIds.length - 1) isLast = true;
+			console.log(isLast);
+			await storeReceipt(
+				batchKey,
+				tokenId,
+				batchAcademicValues[i]["Certificate Printed Name"],
+				batchAcademicValues[i]["Certified Date"],
+				JSON.stringify(txReceipt),
+				isLast
+			);
+		}
+
+		// TODO: Close loader here
 	}
 }
 
