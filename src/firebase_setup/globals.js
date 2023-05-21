@@ -1,5 +1,5 @@
 import { database } from "../firebase_setup/firebase";
-import { ref, set, push, child } from "firebase/database";
+import { get, ref, set, push, child } from "firebase/database";
 
 export const storeReceipt = async (
 	batchKey,
@@ -28,4 +28,22 @@ export const firebaseCreateBatch = async (batchInfo) => {
 	const batchKey = push(child(ref(db), "batches")).key;
 	await set(ref(db, "batches/" + batchKey), batchInfo);
 	return batchKey;
+};
+
+export const firebaseGetBatch = async (batchKey) => {
+	const db = database;
+	let batches = null;
+	await get(child(ref(db), `batches/${batchKey}`))
+		.then((snapshot) => {
+			if (snapshot.exists()) {
+				batches = snapshot.val();
+				console.log("GET BATCH: ", batches);
+			} else {
+				console.log("No data available");
+			}
+		})
+		.catch((error) => {
+			console.error(error);
+		});
+	return batches;
 };

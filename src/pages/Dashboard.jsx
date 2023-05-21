@@ -1,8 +1,6 @@
-import Sidebar from "../components/Sidebar";
-
 function Dashboard() {
 	return (
-		<div className="bg-danger">
+		<div className="bg-danger home">
 			<p>Dashboard</p>
 		</div>
 	);

@@ -11,17 +11,23 @@ import UploadExcelTemplate from "../components/UploadExcelTemplate";
 import CreateBatchInfo from "../components/CreateBatchInfo";
 import { firebaseCreateBatch } from "../firebase_setup/globals";
 import { storeReceipt } from "../firebase_setup/globals";
+import SwalLoader from "../components/SwalLoader";
+import { useNavigate } from "react-router-dom";
 
 const provider = new ethers.providers.Web3Provider(window.ethereum);
 const signer = provider.getSigner();
-const contractAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+const contractAddress = import.meta.env.VITE_BLOCKCHAIN_CONTRACT_ADDRESS;
 const contract = new ethers.Contract(contractAddress, FireGuys.abi, signer);
+
 function CreateBatch() {
+	const navigate = useNavigate();
 	// const imageURI = `https://gateway.pinata.cloud/ipfs/${contentId}/${tokenId}.png`;
 	const imageURI = `img/0.jpg`;
 	useEffect(() => {
 		getCount();
 	}, []);
+
+	const [isLoaderVisible, setIsLoaderVisible] = useState(false);
 
 	// blockchain actions
 	const [totalMinted, setTotalMinted] = useState(0);
@@ -42,11 +48,11 @@ function CreateBatch() {
 		for (let i = 0; i < batchAcademicValues.length; i++) {
 			addresses.push(addr);
 			// metadataURI
-			const tokenId = Number(currentTotalMinted) + Number(i) + 1;
+			const tokenId = Number(currentTotalMinted) + Number(i);
 			const metadataURI = `${contentId}/${tokenId}.json`;
-			tokenIds.push(tokenId);
 			metadataURIs.push(metadataURI);
 			console.log(tokenId);
+			tokenIds.push(tokenId);
 		}
 		const result = await contract.batchMintAcademicDocuments(
 			addresses,
@@ -54,10 +60,18 @@ function CreateBatch() {
 			batchAcademicValues
 		);
 		const txReceipt = await result.wait();
-		console.log(txReceipt);
+
 		const count = await contract.count();
 		setTotalMinted(parseInt(count));
-		console.log("Total Minted: ", parseInt(count));
+
+		// minted values
+		console.log("===========MINTEd VALUES===========");
+		for (let i = 0; i < tokenIds.length; i++) {
+			const tokenId = tokenIds[i];
+			const mintedValue = await contract.getMintedValue(tokenId);
+			console.log(mintedValue);
+		}
+
 		return { tokenIds, txReceipt };
 	};
 
@@ -68,12 +82,18 @@ function CreateBatch() {
 	});
 	const [templateSheetData, setTemplateSheetData] = useState({});
 	const templates = {
-		Diploma: "/templates/DIPLOMA_CVSU.xlsx",
-		"Certificate Of Grades": "/templates/COG_CVSU.xlsx",
+		Diploma: {
+			excelTemplate: "/templates/DIPLOMA_CVSU.xlsx",
+			bgTemplate: "DIPLOMA_CVSU.jpg",
+		},
+		"Certificate Of Grades": {
+			excelTemplate: "/templates/COG_CVSU.xlsx",
+			bgTemplate: "COG_CVSU.jpg",
+		},
 	};
 
 	return (
-		<div className="p-4">
+		<div className="p-4 home">
 			{/* <WalletBalance />
 				<h1>Fired Guys NFT COllection {totalMinted}</h1>
 				<div className="grid grid-cols-5 gap-4 p-10">
@@ -97,17 +117,24 @@ function CreateBatch() {
 				templates={templates}
 			/>
 			<DownloadExcelTemplate
-				excelTemplatePath={templates[batchInfo.templateType]}
+				excelTemplatePath={
+					templates[batchInfo.templateType]["excelTemplate"]
+				}
 			/>
 			<UploadExcelTemplate setTemplateSheetData={setTemplateSheetData} />
 			<ExcelTableOutput
 				sheetData={templateSheetData}
 				createBatchClick={createBatch}
 			/>
+			<SwalLoader
+				isVisible={isLoaderVisible}
+				loaderTitle="Proccessing Documents"
+			/>
 		</div>
 	);
 
 	async function createBatch() {
+		setIsLoaderVisible(true);
 		const batchKey = await firebaseCreateBatch(batchInfo);
 		const academicValues = templateSheetData;
 		const keys = academicValues[0];
@@ -120,7 +147,10 @@ function CreateBatch() {
 				toMintAcademicValue[key] = currentRow[k];
 			}
 			console.log(toMintAcademicValue);
-			batchAcademicValues.push(toMintAcademicValue);
+			toMintAcademicValue["templateType"] = batchInfo["templateType"];
+			toMintAcademicValue["bgTemplate"] =
+				templates[batchInfo.templateType]["bgTemplate"];
+			batchAcademicValues.push(JSON.stringify(toMintAcademicValue));
 		}
 		const { tokenIds, txReceipt } = await batchMintToken(
 			batchAcademicValues
@@ -130,17 +160,18 @@ function CreateBatch() {
 			let isLast = false;
 			if (i == tokenIds.length - 1) isLast = true;
 			console.log(isLast);
+			const currentAcademicValue = JSON.parse(batchAcademicValues[i]);
 			await storeReceipt(
 				batchKey,
 				tokenId,
-				batchAcademicValues[i]["Certificate Printed Name"],
-				batchAcademicValues[i]["Certified Date"],
+				currentAcademicValue["Certificate Printed Name"],
+				currentAcademicValue["Certified Date"],
 				JSON.stringify(txReceipt),
 				isLast
 			);
 		}
-
-		// TODO: Close loader here
+		setIsLoaderVisible(false);
+		navigate("/view-batch", { state: { batchId: batchKey } });
 	}
 }
 

@@ -1,6 +1,6 @@
-import { Outlet, Link } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { Outlet, Link, useLocation } from "react-router-dom";
 function Sidebar() {
+	const pathsWithoutSidebar = ["/verify-credential"];
 	const location = useLocation();
 	const navigations = [
 		{
@@ -14,6 +14,9 @@ function Sidebar() {
 			link: "/create-batch",
 		},
 	];
+	if (pathsWithoutSidebar.includes(location.pathname)) {
+		return <></>;
+	}
 	return (
 		<>
 			<nav className="sidebar">

@@ -8,9 +8,8 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract FiredGuys is ERC721, ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
-    mapping(uint256 => string) private _mintedValues;
+    mapping(uint256 => string) _mintedValues;
     Counters.Counter private _tokenIdCounter;
-    uint256 private _mintedValue;
     mapping(string => uint8) existingURIs;
 
     constructor() ERC721("CvSU Academic Documents", "CvSU") {}
@@ -64,15 +63,21 @@ contract FiredGuys is ERC721, ERC721URIStorage, Ownable {
         address[] memory recipients,
         string[] memory metadataURIs,
         string[] memory values
-    ) public {
+    ) public returns (uint256[] memory) {
         require(
             recipients.length == metadataURIs.length &&
                 recipients.length == values.length,
             "Invalid input lengths"
         );
+        uint256[] memory tokenIds = new uint256[](recipients.length);
         for (uint256 i = 0; i < recipients.length; i++) {
-            mintAcademicDocument(recipients[i], metadataURIs[i], values[i]);
+            tokenIds[i] = mintAcademicDocument(
+                recipients[i],
+                metadataURIs[i],
+                values[i]
+            );
         }
+        return tokenIds;
     }
 
     function getMintedValue(
