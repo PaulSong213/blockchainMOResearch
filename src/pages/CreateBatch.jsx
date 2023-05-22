@@ -14,12 +14,11 @@ import { storeReceipt } from "../firebase_setup/globals";
 import SwalLoader from "../components/SwalLoader";
 import { useNavigate } from "react-router-dom";
 
-const provider = new ethers.providers.Web3Provider(window.ethereum);
-const signer = provider.getSigner();
-const contractAddress = import.meta.env.VITE_BLOCKCHAIN_CONTRACT_ADDRESS;
-const contract = new ethers.Contract(contractAddress, FireGuys.abi, signer);
-
 function CreateBatch() {
+	const provider = new ethers.providers.Web3Provider(window.ethereum);
+	const signer = provider.getSigner();
+	const contractAddress = import.meta.env.VITE_BLOCKCHAIN_CONTRACT_ADDRESS;
+	const contract = new ethers.Contract(contractAddress, FireGuys.abi, signer);
 	const navigate = useNavigate();
 	// const imageURI = `https://gateway.pinata.cloud/ipfs/${contentId}/${tokenId}.png`;
 	const imageURI = `img/0.jpg`;

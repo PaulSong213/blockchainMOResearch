@@ -323,7 +323,7 @@ body.dark .home .text {
 	background-color: #f8f9fa;
 	padding-top: 9.5rem;
 	padding-bottom: 5rem;
-	height: 100vh;
+	min-height: 100vh;
 }
 .masthead .masthead-device-mockup {
 	display: flex;

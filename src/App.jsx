@@ -10,7 +10,7 @@ import Sidebar from "./components/Sidebar";
 import VerifyTemplate from "./pages/VerifyTemplate";
 import Install from "./components/Install";
 function App() {
-	if (window.ethereum && window.ethereum.isMetaMask) {
+	if (typeof window.ethereum !== "undefined") {
 		console.log("Has metamask");
 		return (
 			<BrowserRouter>

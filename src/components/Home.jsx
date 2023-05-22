@@ -7,12 +7,12 @@ const contractAddress = "0x2A4769759D04c973ab712bB189db5499562B65F8";
 import Sidebar from "./Sidebar";
 import ExcelTableOutput from "./ExcelTableOutput";
 import { read, utils } from "xlsx";
-const provider = new ethers.providers.Web3Provider(window.ethereum);
-const signer = provider.getSigner();
-
-const contract = new ethers.Contract(contractAddress, FireGuys.abi, signer);
 
 function Home() {
+	const provider = new ethers.providers.Web3Provider(window.ethereum);
+	const signer = provider.getSigner();
+
+	const contract = new ethers.Contract(contractAddress, FireGuys.abi, signer);
 	const [totalMinted, setTotalMinted] = useState(0);
 	const [templateSheetData, setTemplateSheetData] = useState(0);
 	useEffect(() => {

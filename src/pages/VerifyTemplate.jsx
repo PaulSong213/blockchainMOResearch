@@ -13,14 +13,14 @@ import {
 	PDFDownloadLink,
 } from "@react-pdf/renderer";
 
-const provider = new ethers.providers.Web3Provider(window.ethereum);
-const signer = provider.getSigner();
-const contractAddress = import.meta.env.VITE_BLOCKCHAIN_CONTRACT_ADDRESS;
-const contract = new ethers.Contract(contractAddress, FireGuys.abi, signer);
 import { useLocation, useNavigate } from "react-router-dom";
 import SwalLoader from "../components/SwalLoader";
 
 function VerifyTemplate() {
+	const provider = new ethers.providers.Web3Provider(window.ethereum);
+	const signer = provider.getSigner();
+	const contractAddress = import.meta.env.VITE_BLOCKCHAIN_CONTRACT_ADDRESS;
+	const contract = new ethers.Contract(contractAddress, FireGuys.abi, signer);
 	const [mintedValue, setMintedValue] = useState({});
 	const [transactionDetails, setTransactionDetails] = useState({});
 
