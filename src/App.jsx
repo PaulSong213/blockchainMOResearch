@@ -1,16 +1,42 @@
-// # terminal 1
-// npx hardhat node
-
-// # terminal 2
-// npx hardhat compile
-// npx hardhat run scripts/sample-script.js --network localhost
-
+import "./index.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.min.js";
+import "boxicons";
+import Dashboard from "./pages/Dashboard.jsx";
+import CreateBatch from "./pages/CreateBatch.jsx";
+import ViewBatch from "./pages/ViewBatch.jsx";
+import Sidebar from "./components/Sidebar";
+import VerifyTemplate from "./pages/VerifyTemplate";
 import Install from "./components/Install";
-import Home from "./components/Home";
 function App() {
-	if (window.ethereum) {
-		return <Home />;
+	if (window.ethereum && window.ethereum.isMetaMask) {
+		console.log("Has metamask");
+		return (
+			<BrowserRouter>
+				<Sidebar />
+				<div>
+					<Routes>
+						{/* NOTE: if the page has sidebar add - className="home" */}
+						<Route path="/" element={<Dashboard />}></Route>
+						<Route
+							path="/create-batch"
+							element={<CreateBatch />}
+						></Route>
+						<Route
+							path="/view-batch"
+							element={<ViewBatch />}
+						></Route>
+						<Route
+							path="/verify-credential"
+							element={<VerifyTemplate />}
+						></Route>
+					</Routes>
+				</div>
+			</BrowserRouter>
+		);
 	} else {
+		console.log("Please install metamask");
 		return <Install />;
 	}
 }

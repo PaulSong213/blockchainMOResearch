@@ -77,7 +77,7 @@ function CreateBatch() {
 
 	// firebase actions
 	const [batchInfo, setBatchInfo] = useState({
-		batchName: "Batch 2020-2021",
+		batchName: "",
 		templateType: "Diploma",
 	});
 	const [templateSheetData, setTemplateSheetData] = useState({});
