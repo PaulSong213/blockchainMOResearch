@@ -6,9 +6,9 @@ module.exports = {
 	artifacts: "./src/artifacts",
 	networks: {
 		sepolia: {
-			url: "https://eth-sepolia.g.alchemy.com/v2/H8FXSCwpMG6YmhK4PNz7TS8cCKC1KiUC",
+			url: "https://eth-sepolia.g.alchemy.com/v2/EvEvQwyNU3wMa104KAw8E_S8cGt2FvnS",
 			accounts: [
-				`0x1e83e6c65c8fc56b32b85fd08489743044b6f4078f44ad510fe93ba0c59b128b`,
+				`0x66a9ce188ff8ebba8b6098391655e0adffd3f4206474796ea62130fecea19535`,
 			],
 		},
 	},

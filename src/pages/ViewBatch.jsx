@@ -74,9 +74,12 @@ function ViewBatch() {
 													verifyTxReceipt["from"] =
 														txReceipt["from"];
 													verifyTxReceipt[
-														"blockHash"
-													] = txReceipt["from"];
-
+														"transactionHash"
+													] =
+														txReceipt[
+															"transactionHash"
+														];
+													console.log(txReceipt);
 													window.open(
 														`/verify-credential?tokenId=${tokenId}&transactionDetails=${JSON.stringify(
 															verifyTxReceipt

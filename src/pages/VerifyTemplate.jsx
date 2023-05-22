@@ -108,7 +108,8 @@ function VerifyTemplate() {
 								Issuer Address: {transactionDetails.from}
 							</span>
 							<span>
-								Document Hash: {transactionDetails.blockHash}
+								Document Hash:
+								{transactionDetails.transactionHash}
 							</span>
 							<PDFDownloadLink
 								className="btn mt-3 mx-auto px-3 btn-secondary"
