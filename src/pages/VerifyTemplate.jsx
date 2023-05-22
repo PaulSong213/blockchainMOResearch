@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 import FireGuys from "../../artifacts/contracts/MyNFT.sol/FiredGuys.json";
 import { useEffect, useState, createRef } from "react";
 import QRCode from "qrcode";
-
+import PageHeader from "../components/PageHeader";
 import {
 	Page,
 	Text,
@@ -18,9 +18,20 @@ const signer = provider.getSigner();
 const contractAddress = import.meta.env.VITE_BLOCKCHAIN_CONTRACT_ADDRESS;
 const contract = new ethers.Contract(contractAddress, FireGuys.abi, signer);
 import { useLocation, useNavigate } from "react-router-dom";
+import SwalLoader from "../components/SwalLoader";
 
 function VerifyTemplate() {
 	const [mintedValue, setMintedValue] = useState({});
+	const [transactionDetails, setTransactionDetails] = useState({});
+
+	const verifyStatusGuide = {
+		verifying: "verifying",
+		verified: "verified",
+		invalid: "invalid",
+	};
+	const [verifyStatus, setVerifyStatus] = useState(
+		verifyStatusGuide.verifying
+	);
 
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -29,11 +40,30 @@ function VerifyTemplate() {
 		// get token id
 		const searchParams = new URLSearchParams(location.search);
 		const tokenId = searchParams.get("tokenId");
-		if (!tokenId) return navigate("/");
+		const paramTransactionDetails = searchParams.get("transactionDetails");
+		if (!tokenId || !paramTransactionDetails) {
+			console.log("Invalid Credentials");
+			setVerifyStatus(verifyStatusGuide.invalid);
+			return;
+		}
 		// get minted value
 		const res = await contract.getMintedValue(tokenId);
+		if (!res) {
+			console.log("Invalid Minted Value");
+			setVerifyStatus(verifyStatusGuide.invalid);
+			return;
+		}
 		setMintedValue(JSON.parse(res));
-		console.log(JSON.parse(res));
+
+		console.log("Minted Value: ", JSON.parse(res));
+
+		// set transaction details
+		setTransactionDetails(JSON.parse(paramTransactionDetails));
+		console.log(
+			"Transaction Details: ",
+			JSON.parse(paramTransactionDetails)
+		);
+		setVerifyStatus(verifyStatusGuide.verified);
 		return res;
 	};
 
@@ -54,33 +84,73 @@ function VerifyTemplate() {
 		],
 	});
 	return (
-		<div className="p-3 bg-white">
-			<div className="py-5 d-flex flex-column justify-content-center">
-				<div>
-					<PDFDownloadLink
-						className="btn btn-primary mb-3"
-						document={
-							<TemplateDocument mintedValue={mintedValue} />
-						}
-						fileName={mintedValue["Certificate Printed Name"]}
+		<div className="p-5 d-flex flex-column justify-content-center">
+			<PageHeader
+				pageName={"Cavite State University Academic Document Verifier"}
+			/>
+			<SwalLoader
+				isVisible={verifyStatus === verifyStatusGuide.verifying}
+				loaderTitle="Verifying Document"
+			/>
+			{verifyStatus === verifyStatusGuide.verified && (
+				<div className="d-flex flex-column">
+					<div className="d-flex justify-content-center my-5">
+						<div
+							className="card p-3 w-100"
+							style={{
+								backgroundColor: "#E6E6E6",
+								fontWeight: "500",
+								maxWidth: "1000px",
+							}}
+						>
+							<span>Issuer: Cavite State University Bacoor</span>
+							<span>
+								Issuer Address: {transactionDetails.from}
+							</span>
+							<span>
+								Document Hash: {transactionDetails.blockHash}
+							</span>
+							<PDFDownloadLink
+								className="btn mt-3 mx-auto px-3 btn-secondary"
+								style={{
+									width: "max-content",
+								}}
+								document={
+									<TemplateDocument
+										mintedValue={mintedValue}
+									/>
+								}
+								fileName={
+									mintedValue["Certificate Printed Name"]
+								}
+							>
+								{({ blob, url, loading, error }) =>
+									loading
+										? "Loading document..."
+										: "Download as PDF"
+								}
+							</PDFDownloadLink>
+						</div>
+					</div>
+					<PDFViewer
+						className="mx-auto"
+						showToolbar={false}
+						width="1000"
+						height="700"
+						style={{
+							backgroundColor: "white",
+						}}
 					>
-						{({ blob, url, loading, error }) =>
-							loading ? "Loading document..." : "Download PDF"
-						}
-					</PDFDownloadLink>
+						<TemplateDocument mintedValue={mintedValue} />
+					</PDFViewer>
 				</div>
-				<PDFViewer
-					className="mx-auto"
-					showToolbar={false}
-					width="1000"
-					height="700"
-					style={{
-						backgroundColor: "white",
-					}}
-				>
-					<TemplateDocument mintedValue={mintedValue} />
-				</PDFViewer>
-			</div>
+			)}
+			{verifyStatus === verifyStatusGuide.invalid && (
+				<div className="alert alert-danger" role="alert">
+					The document is not yet verified. Please contact the
+					registar.
+				</div>
+			)}
 		</div>
 	);
 }
@@ -90,7 +160,9 @@ function TemplateDocument({ mintedValue }) {
 
 	// Generate the QR code data
 	useEffect(() => {
-		QRCode.toDataURL("https://reactjs.org/")
+		let url = window.location.href;
+		console.log(url);
+		QRCode.toDataURL(url)
 			.then((dataURL) => {
 				setQRCodeData(dataURL);
 			})

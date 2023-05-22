@@ -64,8 +64,23 @@ function ViewBatch() {
 												style={{ fontSize: "10px" }}
 												className="btn btn-secondary"
 												onClick={() => {
+													let txReceipt = JSON.parse(
+														batchInfo.tokens[
+															tokenId
+														].txReceipt
+													);
+													let verifyTxReceipt = {};
+
+													verifyTxReceipt["from"] =
+														txReceipt["from"];
+													verifyTxReceipt[
+														"blockHash"
+													] = txReceipt["from"];
+
 													window.open(
-														`/verify-credential?tokenId=${tokenId}`,
+														`/verify-credential?tokenId=${tokenId}&transactionDetails=${JSON.stringify(
+															verifyTxReceipt
+														)}`,
 														"_blank"
 													);
 												}}
