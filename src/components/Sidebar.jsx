@@ -9,6 +9,11 @@ function Sidebar() {
 			link: "/",
 		},
 		{
+			name: "Batch List",
+			icon: "bx bxs-file-doc",
+			link: "/list-batch",
+		},
+		{
 			name: "Create Batch",
 			icon: "bx bxs-file-plus",
 			link: "/create-batch",

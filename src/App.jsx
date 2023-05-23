@@ -9,6 +9,7 @@ import ViewBatch from "./pages/ViewBatch.jsx";
 import Sidebar from "./components/Sidebar";
 import VerifyTemplate from "./pages/VerifyTemplate";
 import Install from "./components/Install";
+import ListBatch from "./pages/ListBatch";
 function App() {
 	if (typeof window.ethereum !== "undefined") {
 		console.log("Has metamask");
@@ -26,6 +27,10 @@ function App() {
 						<Route
 							path="/view-batch"
 							element={<ViewBatch />}
+						></Route>
+						<Route
+							path="/list-batch"
+							element={<ListBatch />}
 						></Route>
 						<Route
 							path="/verify-credential"

@@ -47,3 +47,21 @@ export const firebaseGetBatch = async (batchKey) => {
 		});
 	return batches;
 };
+
+export const firebaseGetAllBatch = async (x) => {
+	const db = database;
+	let batches = null;
+	await get(child(ref(db), `batches/`))
+		.then((snapshot) => {
+			if (snapshot.exists()) {
+				batches = snapshot.val();
+				console.log("GET BATCH: ", batches);
+			} else {
+				console.log("No data available");
+			}
+		})
+		.catch((error) => {
+			console.error(error);
+		});
+	return batches;
+};
