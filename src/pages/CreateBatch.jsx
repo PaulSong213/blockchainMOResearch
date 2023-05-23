@@ -89,6 +89,10 @@ function CreateBatch() {
 			excelTemplate: "/templates/COG_CVSU.xlsx",
 			bgTemplate: "COG_CVSU.jpg",
 		},
+		"Certificate Of Enrollment": {
+			excelTemplate: "/templates/COE_CVSU.xlsx",
+			bgTemplate: "COE_CVSU.jpg",
+		},
 	};
 
 	return (
