@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 
 function CreateBatch() {
 	const provider = new ethers.providers.Web3Provider(window.ethereum);
-	provider.send('eth_requestAccounts', []); // <- this promps user to connect metamask
+	provider.send("eth_requestAccounts", []); // <- this promps user to connect metamask
 	const signer = provider.getSigner();
 	const contractAddress = import.meta.env.VITE_BLOCKCHAIN_CONTRACT_ADDRESS;
 	const contract = new ethers.Contract(contractAddress, FireGuys.abi, signer);
@@ -65,12 +65,15 @@ function CreateBatch() {
 		setTotalMinted(parseInt(count));
 
 		// minted values
-		console.log("===========MINTEd VALUES===========");
+		console.log("===========Minted VALUES===========");
 		for (let i = 0; i < tokenIds.length; i++) {
 			const tokenId = tokenIds[i];
 			const mintedValue = await contract.getMintedValue(tokenId);
 			console.log(mintedValue);
 		}
+
+		console.log("===========Trasaction RECEIPT===========");
+		console.log(txReceipt);
 
 		return { tokenIds, txReceipt };
 	};
