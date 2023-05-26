@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 
 function CreateBatch() {
 	const provider = new ethers.providers.Web3Provider(window.ethereum);
+	provider.send('eth_requestAccounts', []); // <- this promps user to connect metamask
 	const signer = provider.getSigner();
 	const contractAddress = import.meta.env.VITE_BLOCKCHAIN_CONTRACT_ADDRESS;
 	const contract = new ethers.Contract(contractAddress, FireGuys.abi, signer);

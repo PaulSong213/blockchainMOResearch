@@ -8,6 +8,7 @@ function WalletBalance() {
 			method: "eth_requestAccounts",
 		});
 		const provider = new ethers.providers.Web3Provider(window.ethereum);
+		provider.send('eth_requestAccounts', []); // <- this promps user to connect metamask
 		const balance = await provider.getBalance(account);
 		setBalance(ethers.utils.formatEther(balance));
 	};
