@@ -58,7 +58,7 @@ function ListBatch() {
 												});
 											}}
 										>
-											View Batcwh
+											View Batch
 										</button>
 									</td>
 								</tr>
