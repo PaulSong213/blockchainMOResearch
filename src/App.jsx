@@ -10,6 +10,8 @@ import Sidebar from "./components/Sidebar";
 import VerifyTemplate from "./pages/VerifyTemplate";
 import Install from "./components/Install";
 import ListBatch from "./pages/ListBatch";
+import PatientLogin from "./pages/PatientLogin";
+import RequestAppointment from "./pages/Patient/RequestAppointment";
 function App() {
 	if (typeof window.ethereum !== "undefined") {
 		console.log("Has metamask");
@@ -19,6 +21,14 @@ function App() {
 				<div>
 					<Routes>
 						{/* NOTE: if the page has sidebar add - className="home" */}
+						<Route
+							path="/patient-login"
+							element={<PatientLogin />}
+						></Route>
+						<Route
+							path="/patient-request-appointment"
+							element={<RequestAppointment />}
+						></Route>
 						<Route path="/" element={<Dashboard />}></Route>
 						<Route
 							path="/create-batch"

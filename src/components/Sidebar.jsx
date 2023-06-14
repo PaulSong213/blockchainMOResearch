@@ -1,6 +1,10 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 function Sidebar() {
-	const pathsWithoutSidebar = ["/verify-credential"];
+	const pathsWithoutSidebar = [
+		"/verify-credential",
+		"/patient-login",
+		"/patient-request-appointment",
+	];
 	const location = useLocation();
 	const navigations = [
 		{
