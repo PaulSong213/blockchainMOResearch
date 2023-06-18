@@ -11,7 +11,7 @@ import VerifyTemplate from "./pages/VerifyTemplate";
 import Install from "./components/Install";
 import ListBatch from "./pages/ListBatch";
 import PatientLogin from "./pages/PatientLogin";
-import RequestAppointment from "./pages/Patient/RequestAppointment";
+import RequestAppointment from "./pages/Patient/RequestAppointment/RequestAppointment";
 function App() {
 	if (typeof window.ethereum !== "undefined") {
 		console.log("Has metamask");
